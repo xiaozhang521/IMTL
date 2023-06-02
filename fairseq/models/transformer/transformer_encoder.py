@@ -107,9 +107,14 @@ class TransformerEncoderBase(FairseqEncoder):
                 activation='relu'
             )
             self.conv_list = nn.ModuleList([])
-            self.conv_list.extend(
-                [ConvolutionModule(embed_dim, cfg.encoder.embed_conv_kernel, activation_fn) for i in range(cfg.encoder.encoder_conv)]
-            )
+            if cfg.encoder.local_to_global:
+                self.conv_list.extend(
+                    [ConvolutionModule(embed_dim, cfg.encoder.embed_conv_kernel + 3 * i + (i % 2), activation_fn) for i in range(cfg.encoder.encoder_conv)]
+                )
+            else:
+                self.conv_list.extend(
+                    [ConvolutionModule(embed_dim, cfg.encoder.embed_conv_kernel, activation_fn) for i in range(cfg.encoder.encoder_conv)]
+                )
         else:
             self.conv_list = None
 

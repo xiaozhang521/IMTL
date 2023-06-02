@@ -287,6 +287,35 @@ def transformer_mustc_de_en_conv_all(args):
     args.encoder_conv = getattr(args, "encoder_conv", 6)
     transformer_mustc_de_en(args)
 
+@register_model_architecture("transformer", "transformer_mustc_en_de_conv_all_l2g")
+def transformer_mustc_de_en_conv_all_l2g(args):
+    args.embed_conv_kernel = 3
+    args.encoder_conv = getattr(args, "encoder_conv", 6)
+    args.local_to_global = getattr(args, "local_to_global", True)
+    transformer_mustc_de_en(args)
+
+@register_model_architecture("transformer", "transformer_mustc_en_de_conv5_all_l2g")
+def transformer_mustc_de_en_conv5_all_l2g(args):
+    args.embed_conv_kernel = 5
+    args.encoder_conv = getattr(args, "encoder_conv", 6)
+    args.local_to_global = getattr(args, "local_to_global", True)
+    transformer_mustc_de_en(args)
+
+@register_model_architecture("transformer", "transformer_mustc_en_de_conv5_all_l2g_2048")
+def transformer_mustc_de_en_conv5_all_l2g_2048(args):
+    args.embed_conv_kernel = 5
+    args.encoder_conv = getattr(args, "encoder_conv", 6)
+    args.local_to_global = getattr(args, "local_to_global", True)
+    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 2048)
+    args.decoder_ffn_embed_dim = getattr(args, "decoder_ffn_embed_dim", 2048)
+    transformer_mustc_de_en(args)
+
+@register_model_architecture("transformer", "transformer_mustc_en_de_conv15_all")
+def transformer_mustc_de_en_conv15_all(args):
+    args.embed_conv_kernel = 15
+    args.encoder_conv = getattr(args, "encoder_conv", 6)
+    transformer_mustc_de_en(args)
+
 @register_model_architecture("transformer", "transformer_mustc_en_de_conv5_2048")
 def transformer_mustc_de_en_conv5(args):
     args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 2048)

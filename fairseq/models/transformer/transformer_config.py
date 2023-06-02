@@ -67,6 +67,10 @@ class EncDecBaseConfig(FairseqDataclass):
             "help": "use the conv on encoder"
         },
     )
+    local_to_global: bool = field(
+        default=False, metadata={"help": "local to gloabl training in encoder"}
+    )
+
 
 
 @dataclass
