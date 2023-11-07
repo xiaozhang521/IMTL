@@ -921,13 +921,13 @@ class AcousticEncoder(Wav2vecEncoder):
                 for i, v in enumerate(lengths):
                     x[i, :v] = shrink_2d[l_index:l_index+v]
                     l_index += v
-            padding_mask = lengths_to_padding_mask(lengths)
-            wav_feature = wav_feature.transpose(0, 1)
-
-            x = self.shrink_layer_norm(x.transpose(0, 1))
-            if self.lbm:
-                #print(x.shape, wav_feature.shape, bf_shrink_padding_mask.shape)
-                x = self.lbm(x, wav_feature, bf_shrink_padding_mask)
+                #padding_mask = lengths_to_padding_mask(lengths)
+                padding_mask = torch.zeros([wav_feature.size(0), max_len]).bool().to(padding_mask.device)
+                wav_feature = wav_feature.transpose(0, 1)
+                x = self.shrink_layer_norm(x.transpose(0, 1))
+                if self.lbm:
+                    #print(x.shape, wav_feature.shape, bf_shrink_padding_mask.shape)
+                    x = self.lbm(x, wav_feature, bf_shrink_padding_mask)
                 #print(x.mean(-1).tolist())
 
             #with open("st_token","a")as fo:
@@ -1021,10 +1021,10 @@ def base_architecture(args):
     # Convolutional subsampler
     args.conv_kernel_sizes = getattr(args, "conv_kernel_sizes", "5,5")
     args.conv_channels = getattr(args, "conv_channels", 1024)
-    # conformer
+    # transformer
     args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 512)
-    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 1024)
-    args.encoder_layers = getattr(args, "encoder_layers", 12)
+    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 2048)
+    args.encoder_layers = getattr(args, "encoder_layers", 6)
     args.encoder_attention_heads = getattr(args, "encoder_attention_heads", 8)
     args.encoder_normalize_before = getattr(args, "encoder_normalize_before", True)
     args.decoder_embed_dim = getattr(args, "decoder_embed_dim", args.encoder_embed_dim)
@@ -1056,9 +1056,29 @@ def base_architecture(args):
     args.no_scale_embedding = getattr(args, "no_scale_embedding", False)
     args.quant_noise_pq = getattr(args, "quant_noise_pq", 0)
 
+@register_model_architecture("s2t_joint", "s2t_joint_l2g")
+def s2t_joint_l2g(args):
+    args.embed_conv_kernel = 5
+    args.encoder_conv = getattr(args, "encoder_conv", 6)
+    args.local_to_global = getattr(args, "local_to_global", True)
+    base_architecture(args)
+
+@register_model_architecture("s2t_joint", "s2t_joint_l2g_mustc")
+def s2t_joint_l2g_mustc(args):
+    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 1024)
+    args.decoder_ffn_embed_dim = getattr(args, "decoder_ffn_embed_dim", 1024)
+    args.encoder_attention_heads = getattr(args, "encoder_attention_heads", 4)
+    args.decoder_attention_heads = getattr(args, "decoder_attention_heads", 4)
+    s2t_joint_l2g(args)
+
+@register_model_architecture("s2t_joint", "s2t_joint_768")
+def s2t_joint_768(args):
+    args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 768)
+    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 256 * 12)
+    base_architecture(args)
 
 @register_model_architecture("s2t_joint", "s2t_joint_s")
-def s2t_w2v2_mabrt_sead_s(args):
+def s2t_joint_s(args):
     args.use_asr_finetune_w2v = getattr(args, "use_asr_finetune_w2v", False)
     args.encoder_embed_dim = getattr(args, "encoder_embed_dim", 256)
     args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 256 * 8)

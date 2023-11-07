@@ -150,16 +150,16 @@ class TripleDataset(FairseqDataset):
         return text
 
     def add_blank_noise_in_text(self, line: str):
-        rm_punk=",.;!?:"
-        line = line.replace("...","<s>")
-        line = line.replace("..","<s>")
-        for w in rm_punk:
-            line = line.replace(w,"<s>")
-        line=line.replace("  "," ")
         #out.write(line)
-        if np.random.random() < 0.2:
+        if np.random.random() < 0.1:
+            rm_punk=",.;!?:"
+            line = line.replace("...","<s>")
+            line = line.replace("..","<s>")
+            for w in rm_punk:
+                line = line.replace(w,"<s>")
+            line=line.replace("  "," ")
             tags = line.strip().split(" ")
-            ratio = np.random.random()*0.1+0.1
+            ratio = np.random.random()*0.2
             length = len(tags)
             add_num = round(len(tags) * ratio)
             for i in range(add_num):

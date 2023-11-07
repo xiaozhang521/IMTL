@@ -645,23 +645,29 @@ class MTModelEncoder(TransformerEncoder):
         arg_overrides = {
             "dropout": cfg.dropout,
         }
-        if cfg.mt_model_args is None:
+        if cfg.mt_model_args is None and getattr(cfg, "mt_model_path", None):
             state = checkpoint_utils.load_checkpoint_to_cpu(cfg.mt_model_path, arg_overrides)
             mt_model_args = state.get("cfg", None) 
             assert  mt_model_args is not None,("Miss mt model args") 
+            super().__init__(mt_model_args.model, tgt_dict, embed_tokens)
+        else:
+            state=None
+            super().__init__(cfg, tgt_dict, embed_tokens)
+                
         #arg=copy.deepcopy()
         #arg.decoder_layers=arg.mbart_layers
         #arg.input_embed_dim = embed_tokens.embedding_dim
-        super().__init__(mt_model_args.model, tgt_dict, embed_tokens)
+        #super().__init__(mt_model_args.model, tgt_dict, embed_tokens)
 
         embed_dim = embed_tokens.embedding_dim
-        for key in list(state['model'].keys()):
-            w = state['model'].pop(key)
-            if key.startswith('encoder') and "embed_tokens" not in key:
-                new_key = key.replace('encoder.', '')
-                state['model'][new_key] = w
-        self.load_state_dict(state["model"], strict=False)
-        logging.info("load pretrained encoder: {}".format(cfg.mt_model_path))
+        if state:
+            for key in list(state['model'].keys()):
+                w = state['model'].pop(key)
+                if key.startswith('encoder') and "embed_tokens" not in key:
+                    new_key = key.replace('encoder.', '')
+                    state['model'][new_key] = w
+            self.load_state_dict(state["model"], strict=False)
+            logging.info("load pretrained encoder: {}".format(cfg.mt_model_path))
         self.filter_size = cfg.mt_model_filter_size
         if self.filter_size != 0:
             self.down_proj = nn.Linear(embed_tokens.embedding_dim, self.filter_size)

@@ -423,9 +423,9 @@ class JointTriplePretrainingTask(SpeechToTextTask):
             if per_task not in sample.keys():
                 continue
             else:
-                if per_task == "asr" and (update_num > 30000 or self.asr_weight < 0.1): #
+                if per_task == "asr" and (update_num > 20000 or self.asr_weight < 0.1): #
                     continue
-                if per_task == "mt" and (update_num > 50000 or self.mt_weight < 0.1): #
+                if per_task == "mt" and (update_num > 30000 or self.mt_weight < 0.1): #
                     continue
             #if per_task == "st" and update_num < 3000:
             #    continue
@@ -479,40 +479,33 @@ class JointTriplePretrainingTask(SpeechToTextTask):
                 #agg_logging_output[f"{task_pair}:{k}"] += logging_output[k]
                 #print(k)
         
-        if update_num % 5000 == 0 and update_num != 0 :
+
+        # update ASR task
+        if update_num % 5000 == 0 and update_num != 0 and self.asr_weight >= 0.1 and update_num < 20000:
             coe = int(update_num / 5000) 
-            if self.asr_weight >= 0.1 and update_num < 30000 :
-                if asr_list and st_list:
-                    tmp_asr_weight = self.asr_weight * (asr_list[0] / st_list[0]) ** coe
-                else:
-                    tmp_asr_weight = self.asr_weight 
-                #if self.asr_weight - tmp_asr_weight  < 0.01 : 
-                #    self.asr_weight = torch.Tensor([0]).cuda()
-                #else:
-            if self.mt_weight >= 0.1 and update_num < 50000:
-                if mt_list and st_list:
-                    tmp_mt_weight = self.mt_weight * max(mt_list[0] / st_list[1], mt_list[1] / st_list[2]) ** (coe / 2)
-                    #tmp_mt_weight = self.mt_weight * (((mt_list[0] / st_list[1]) + (mt_list[1] / st_list[2])) / 2) ** (coe / 2)
-                else:
-                    tmp_mt_weight = self.mt_weight 
-                #if self.mt_weight - tmp_mt_weight < 0.01 : 
-                #    self.mt_weight = torch.Tensor([0]).cuda()
-                #else:
-                #print("mt_wight",tmp_mt_weight)
+            if asr_list and st_list:
+                tmp_asr_weight = self.asr_weight * (asr_list[0] / st_list[0]) ** coe
+            else:
+                tmp_asr_weight = self.asr_weight 
+
             if torch.distributed.is_initialized():
                 world_size = dist.get_world_size()
-                if self.asr_weight >= 0.1 and update_num < 30000:
-                    #handle = dist.all_reduce(output, async_op=True)
-                    #handle.wait()
-                    dist.all_reduce(tmp_asr_weight)
-                    self.asr_weight = tmp_asr_weight / world_size 
-                if self.mt_weight >= 0.1 and update_num < 50000:
-                    dist.all_reduce(tmp_mt_weight)
-                    self.mt_weight = tmp_mt_weight / world_size 
+                dist.all_reduce(tmp_asr_weight)
+                self.asr_weight = tmp_asr_weight / world_size 
             self.state.merge_state_dict({"asr_weight": self.asr_weight})
+            print("asr weight", self.asr_weight) #(asr_list[0] / st_list[0]))
+        if update_num % 5000 == 0 and update_num != 0 and self.mt_weight >= 0.1 and update_num < 30000:
+            coe = int(update_num / 5000) 
+            if mt_list and st_list:
+                tmp_mt_weight = self.mt_weight * max(mt_list[0] / st_list[1], mt_list[1] / st_list[2]) ** (coe / 2)
+            else:
+                tmp_mt_weight = self.mt_weight 
+            if torch.distributed.is_initialized():
+                world_size = dist.get_world_size()
+                dist.all_reduce(tmp_mt_weight)
+                self.mt_weight = tmp_mt_weight / world_size 
             self.state.merge_state_dict({"mt_weight": self.mt_weight})
-            print(self.mt_weight) #(mt_list[0] / st_list[1]), (mt_list[1] / st_list[2]))
-            print(self.asr_weight) #(asr_list[0] / st_list[0]))
+            print("mt weight", self.mt_weight) #(mt_list[0] / st_list[1]), (mt_list[1] / st_list[2]))
         return agg_loss, agg_sample_size, agg_logging_output
 
     def _per_task_pair_valid_loss(self, per_task, model, criterion, sample):
