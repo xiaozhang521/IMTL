@@ -1,21 +1,17 @@
 #! /usr/bin/bash
 set -e
-source /home/zhangyuhao/VENV/py38/bin/activate
-device=2,3
-#device=
 
-#task=iwslt-de2en
+device=2,3
+
+
+
 task=wmt-en2de
 # must set this tag
-#tag=pre_norm_inter_p_newton_1_init_0.002_16000
-tag=iwslt23-conv-silent-encoder3-conv3
-#tag=test3
+
+tag=
+
 
 if [ $task == "wmt-en2de" ]; then
-        #arch="transformer_mustc_en_de_conv_all"
-        #arch="transformer_mustc_en_de_conv5_rpr"
-        #arch="transformer_mustc_en_de_conv5"
-        #arch="transformer_mustc_en_de_encoder3_conv5"
         arch="transformer_mustc_en_de_encoder3_conv3"
         share_embedding=1
         share_decoder_input_output_embed=1
@@ -84,7 +80,7 @@ cp ${BASH_SOURCE[0]} $save_dir/train.sh
 
 gpu_num=`echo "$device" | awk '{split($0,arr,",");print length(arr)}'`
 
-cmd="python3 -u /mnt/zhangyuhao/fairseq-0.12.3/train.py data-bin/$data_dir
+cmd="python3 -u fairseq-0.12.3/train.py data-bin/$data_dir
   --distributed-world-size $gpu_num -s $src_lang -t $tgt_lang
   --arch $arch
   --optimizer adam --clip-norm 0.0

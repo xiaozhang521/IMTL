@@ -23,11 +23,11 @@ stop_stage=1
 ######## hardware ########
 # devices
 device=(0,1,2,3,4,5,6,7)
-#device=(0,1)
-gpu_num=8
-update_freq=1
 
-root_dir=/mnt/zhangyuhao/fairseq-0.12.3
+gpu_num=8
+update_freq=3
+
+root_dir=
 pwd_dir=$PWD
 
 
@@ -53,10 +53,9 @@ asr_vocab_prefix=spm_unigram10000_st_share
 st_vocab_prefix=spm_unigram10000_st_share
 
 org_data_dir=raw_data
-#data_dir=data_g_no_specaug
-data_dir=data_all_ende
-#data_dir=data_g
-#data_dir=data_ende_gpt
+
+data_dir=
+
 test_subset=test
 
 # exp
@@ -64,42 +63,22 @@ exp_prefix=${time}
 extra_tag=
 extra_parameter=
 exp_tag=baseline
-#exp_name=conformer_ctc_perturb_gtrans_no_specagument
-#exp_name=conformer_ctc_perturb_gtrans_pretrain_all_xlmr_kd_embedding_vocab1W
 
-#exp_name=transformer_w2v_perturb_gtrans
-#exp_name=st_joint_train_8gpu_ende_cl
-#exp_name=st_joint_train_8gpu_ende_word_ctc_shrink
-#exp_name=st_joint_train_8gpu_ende_word_ctc_cr_word_align
-#exp_name=st_joint_ctc_all_shrink_uniq_word_align_task_relax_ban_lookback_bigbatch
-#exp_name=st_joint_ctc_all_shrink_uniq_word_align_task_relax_lookback_bigbatch_two_cl
-#exp_name=st_joint_ctc_all_shrink_uniq_word_align_task_relax_lookback_bigbatch_two_cl_conv_sead
-#exp_name=st_joint_ctc_all_shrink_uniq_word_align_task_relax_lookback_bigbatch_two_cl_conv_silent_noise
-#exp_name=st_joint_ctc_all_shrink_uniq_word_align_task_relax_lookback_bigbatch_two_cl_encoder_conv_noise_new
-#exp_name=st_joint_ctc_all_shrink_uniq_word_align_task_relax_lookback_bigbatch_two_cl_encoder3_conv3_noise_banscale_maxmt_weight
-exp_name=st_joint_ctc_all_shrink_uniq_word_align_task_relax_lookback_bigbatch_two_cl_encoder_conv_noise_banscale_maxmt_weight
-#exp_name=st_joint_ctc_all_shrink_uniq_word_align_task_relax_lookback_bigbatch_two_cl_conv_noise_banscale_maxmt_weight_repeat
-#exp_name=st_joint_ctc_shrink_fix_padding
+exp_name=
+
 fine_tune=
 use_w2v_ctc=1
 apply_mask=
 
 # config
-#train_config=train_ctc_conformer.yaml
-#train_config=train_transformer_w2v.yaml
-#train_config=train_joint_hubert_bce.yaml
-#train_config=train_joint_hubert_bce.yaml
-#train_config=train_joint_hubert_word_ctc_shrink.yaml
-#train_config=train_joint_hubert_cluster_task_relax.yaml
-train_config=train_joint_hubert_cluster_task_relax_noise.yaml
-#train_config=train_joint_hubert_baseline.yaml
-#train_config=train_ctc_conformer_pretrain_ft_st.yaml
+
+train_config=train_joint_hubert_cluster_task_relax_noise_ende.yaml
+#train_config=train_joint_hubert_cluster_task_relax_noise_ende_kd.yaml # KD config
+
 freeze_decode_module=
-#freeze_encode_module=wav2vec_model
+
 share_decoder_input_output_embed=1
-#decoder_embed_path=/apdcephfs/share_1157259/users/adrienxu/st/pretrain-text/mbart/embeddings
-#decoder_embed_path=/mnt/zhangyuhao/MSP-ST/fairseq/egs/machine_translation/pretrain_embeddings
-#decoder_embed_path=/apdcephfs/share_1157259/users/adrienxu/st/pretrain-text/xlmr.large/embeddings_kd
+
 tune_w2v_LNA=
 tune_mbart_LNA=
 tune_encoder_LNA=
@@ -108,7 +87,7 @@ tune_encoder_LNA=
 fp16=1
 max_tokens=15000
 max_batch_size=
-#max_tokens=3000
+
 step_valid=1
 bleu_valid=1
 save_interval_updates=4000
@@ -119,13 +98,7 @@ dec_model=checkpoint_best.pt
 n_average=10
 beam_size=5
 len_penalty=1.0
-#load_pretrain_encoder=checkpoints/libri_trans/st/conformer_ctc_perturb_gtrans_pretrain_wav2vec_content_xlmr_ffn_embedding_vocab1W/checkpoint_last.pt
-#load_pretrain_decoder=/apdcephfs/share_1157259/users/adrienxu/st/pretrain-text/mbart/mbart.cc25.v2/model.pt
-#load_pretrain_encoder=/apdcephfs/share_1157259/users/adrienxu/st/pretrain-text/mbart/mbart.cc25.v2/model.pt
-#load_pretrain_decoder=/mnt/zhangyuhao/fairseq-0.10.2/egs/mt-finetune/checkpoints/mbart-ende/checkpoint_best.pt
-#load_pretrain_decoder=/mnt/zhangyuhao/MSP-ST/fairseq/egs/machine_translation/checkpoints/wmt-en2de/merge-lcrm/last5.ensemble.pt
-#load_pretrain_encoder=/apdcephfs/share_1157259/users/adrienxu/st/pretrain-text/mt-finetune/checkpoints/model.pt
-#load_encoder_layers_from=/apdcephfs/share_1157259/users/adrienxu/st/pretrain-text/mt-finetune/checkpoints/model.pt
+
 if [[ $fine_tune -eq 1 ]]; then
     train_config=tune_st_hubert_shrink.yaml
     max_tokens=5000

@@ -2,9 +2,6 @@
 
 # Processing MuST-C Datasets
 
-# Copyright 2021 Natural Language Processing Laboratory 
-# Xu Chen (xuchenneu@163.com)
-
 # Set bash to 'debug' mode, it will exit on :
 # -e 'error', -u 'undefined variable', -o ... 'error in pipeline', -x 'print commands',
 set -e
@@ -24,8 +21,8 @@ device=()
 gpu_num=0
 update_freq=1
 
-cd /mnt/zhangyuhao/fairseq-0.12.3/egs/pretrain-all
-root_dir=/mnt/zhangyuhao/fairseq-0.12.3/
+
+root_dir=
 pwd_dir=$PWD
 
 # dataset
